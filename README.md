@@ -1,8 +1,39 @@
 # Rooftop::Rails::Events
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rooftop/rails/events`. To experiment with that code, run `bin/console` for an interactive prompt.
+A library to make it super-easy to integrate events from [Rooftop CMS](https://www.rooftopcms.com) into your Rails site.
 
-TODO: Delete this and the text above, and describe your gem
+## What's included
+A bit of a mix of stuff, and all work in progress. Here's a flavour:
+
+## Controller Mixins
+You need to `include` these yourself.
+
+### Rooftop::Rails::Events::EventHandler
+A mixin for a controller which handles events. It has methods for show() and instances() which get the event from Rooftop for you.
+
+## Model Mixins
+These are `include`d automatically when you use this gem.
+
+
+### Rooftop::Rails::Events::Cache
+A mixin added to the Rooftop::Events::Event to cache / expire it.
+
+### Rooftop::Rails::Events::InstanceCache
+The same as `Rooftop::Rails::Events::Cache` but for instances. Allows you to receive a webhook for just an instance and be able to clear the cache for its associated `Event`.
+
+### Rooftop::Rails::Events::Scopes
+Handy scopes for dealing with events - finding after a date, between dates, in the future etc.
+
+## Object Decorators
+We use a lot of [Draper](https://github.com/drapergem/draper) as our decorator pattern at [Error Agency](https://error.agency). So there are some mixins you add to your EventDecorator to provide utility methods for use in views.
+
+```
+#in your project
+class EventDecorator < Draper::Decorator
+    include Rooftop::Rails::Events::Decorators
+end
+```
+
 
 ## Installation
 
