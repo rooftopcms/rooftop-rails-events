@@ -14,11 +14,17 @@ module Rooftop
         end
 
         def featured_review
-          has_featured_review? ? Rooftop::Content::Field.new(fields.featured_review.first) : nil
+          has_featured_review? ? Rooftop::Content::Collection.new(fields.featured_review.first[:advanced].first[:fields]) : nil
         end
 
         def reviews
-          has_reviews? ? Rooftop::Content::Collection.new(fields.reviews) : []
+          if has_reviews?
+            fields.reviews.collect do |review|
+              Rooftop::Content::Collection.new(review[:advanced].first[:fields])
+            end
+          else
+            return []
+          end
         end
 
       end
