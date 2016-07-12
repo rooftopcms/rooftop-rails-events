@@ -9,7 +9,6 @@ module Rooftop
           base.send(:include, Rooftop::Rails::Events::Content)
           base.send(:include, Rooftop::Rails::Events::Cast)
           base.send(:include, Rooftop::Rails::Events::Media)
-          base.send(:include, Rooftop::Rails::Events::Person)
 
         end
       end
