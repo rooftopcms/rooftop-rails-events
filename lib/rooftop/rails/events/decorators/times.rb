@@ -3,6 +3,15 @@ module Rooftop
     module Events
       module Times
 
+        def has_instance_availabilities?
+          respond_to?(:event_instance_availabilities) && event_instance_availabilities.size>0
+        end
+
+        def date_range
+          dates = event_instance_availabilities.first.values.collect{|instance| DateTime.parse(instance[:starts_at])}.sort
+          range = [dates[0], dates[-1]].uniq
+        end
+
         def has_running_time?
           meta_attributes[:duration].present?
         end
