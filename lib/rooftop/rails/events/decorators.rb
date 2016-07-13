@@ -10,6 +10,7 @@ module Rooftop
           base.send(:include, Rooftop::Rails::Events::Cast)
           base.send(:include, Rooftop::Rails::Events::Media)
           base.send(:include, Rooftop::Rails::Events::Reviews)
+          base.send(:include, Rooftop::Rails::Events::Times)
         end
       end
     end
