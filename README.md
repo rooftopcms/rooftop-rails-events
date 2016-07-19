@@ -34,6 +34,41 @@ class EventDecorator < Draper::Decorator
 end
 ```
 
+## Controller mixin for Event collections
+The standard pattern we've found works well for Rooftop is to have a PagesController with mixins which check the template of the page you're rendering, and makes requests to get collections of objects you'll need.
+
+```
+class PagesController < ApplicationController
+    include Rooftop::Rails::Events::EventCollections 
+end
+```
+You get a bunch of stuff for free with this:
+
+* Rooftop events in the future will be returned as a collection called @events by default
+* if you pass in query params, you can filter these:
+  *  `q` will do a free-text search
+  *  `from` will take an dd-mm-yyyy date string and return things happening on or after that date
+  *  `to` will work likewise, in reverse
+ 
+### Customising querystring filters
+You might want to filter by something else. That's relatively easy.
+
+```
+class PagesController < ApplicationController
+    include Rooftop::Rails::Events::EventCollections
+    self.add_event_filter :genre, ->(events,params) {
+        # add something here which returns a collection when genre is passed in, for example
+        # very important - you must return something here
+        if params[:genre].present?
+            events.with_genre(params[:genre])
+        else
+            events
+        end
+    }
+end
+```
+
+
 
 ## Installation
 

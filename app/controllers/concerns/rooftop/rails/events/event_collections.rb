@@ -10,9 +10,26 @@ module Rooftop
         end
 
         class_methods do
-          attr_reader :event_index_template
+          attr_reader :event_index_template, :event_filters, :filter_keys
           def event_index_template(template)
             @event_index_template = template.to_s
+          end
+
+          # A method to allow us to filter on extra things from the command line (e.g. genre)
+          # To use in your controller:
+          # self.add_event_filter :genre, ->(events) {
+          #   return the matching set here
+          # }
+
+          def add_event_filter(key,filter)
+            if filter.is_a?(Proc)
+              @filter_keys ||= []
+              @event_filters ||= []
+              @filter_keys << key
+              @event_filters << filter
+            else
+              raise ArgumentError, "add_event_filter takes a proc which is evaluated in the filter_events method, and a params key to check for"
+            end
           end
         end
 
@@ -22,12 +39,14 @@ module Rooftop
         end
 
         def get_index_events
-          @events = filter_events(Rooftop::Events::Event.in_future).sort_by {|e| e.event_instance_dates[:first]}
+          @events = filter_events(Rooftop::Events::Event.in_future).sort_by {|e| e.event_instance_dates[:first]} rescue []
         end
 
         def has_filter_keys?
-          filter_keys = ["from", "to", "venue", "genre", "q"]
-          (params.keys & filter_keys).any? && filter_keys.collect {|k| params[k].present?}.any?
+          fixed_filter_keys = ["from", "to", "q"]
+          self.class.filter_keys ||= []
+          all_filter_keys = fixed_filter_keys + self.class.filter_keys.collect(&:to_s)
+          (params.keys & all_filter_keys).any? && all_filter_keys.collect {|k| params[k].present?}.any?
         end
 
         def filter_events(events)
@@ -46,17 +65,16 @@ module Rooftop
             all_match << events.showing_on(from)
           end
 
-          if params[:venue].present?
-            all_match << events.matching_summary_venue(params[:venue])
-          end
-
-          if params[:genre].present?
-            all_match << events.with_genre(params[:genre])
-          end
-
           # free-text search
           if params[:q].present?
             all_match << events.matching_query(params[:q])
+          end
+
+          # Iterate over any other filters supplied in procs
+          if self.class.event_filters.present?
+            self.class.event_filters.each do |filter|
+              all_match << filter.call(events, params)
+            end
           end
 
           # intersect all the alls
