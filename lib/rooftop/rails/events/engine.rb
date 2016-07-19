@@ -20,7 +20,7 @@ module Rooftop
           ::Rails.application.eager_load!
           Rooftop::Events::Event.send(:include, Rooftop::Rails::Events::Cache)
           Rooftop::Events::Event.send(:include, Rooftop::Rails::Events::Scopes)
-          Rooftop::Events::Instance.send(:include, Rooftop::Rails::Events::InstanceCache)
+          # Rooftop::Events::Instance.send(:include, Rooftop::Rails::Events::InstanceCache)
           Rooftop::Events::Instance.send(:include, Rooftop::Rails::Events::BookingInformation)
         end
 
