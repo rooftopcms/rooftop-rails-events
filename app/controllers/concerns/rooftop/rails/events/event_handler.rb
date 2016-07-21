@@ -33,6 +33,11 @@ module Rooftop
           @event_details = EventDetailDecorator.new(@event, @instances)
         end
 
+        def book_instance
+          @event = Rooftop::Events::Event.where(slug: params[:event_id]).first
+          @instance_id = params[:instance_id]
+        end
+
 
       end
     end
