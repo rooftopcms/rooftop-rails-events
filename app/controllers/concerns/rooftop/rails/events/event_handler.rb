@@ -20,22 +20,25 @@ module Rooftop
           end
 
           @instances = @event.embedded_instances
+
+          yield if block_given?
         end
 
         def instances
           @event = Rooftop::Events::Event.where(slug: params[:event_id]).first
-          if @event.has_alternative_booking_link?
-            redirect_to @event.alternative_booking_link and return
-          end
 
           @instances = Rooftop::Events::Instance.all(_event_id: @event.id, include_embedded_resources: true).sort_by {|i| DateTime.parse(i.meta_attributes[:availability][:starts_at])}.to_a.reject! {|e| DateTime.parse(e.meta_attributes[:availability][:starts_at]) < DateTime.now}
 
           @event_details = EventDetailDecorator.new(@event, @instances)
+
+          yield if block_given?
         end
 
         def book_instance
           @event = Rooftop::Events::Event.where(slug: params[:event_id]).first
           @instance_id = params[:instance_id]
+
+          yield if block_given?
         end
 
 

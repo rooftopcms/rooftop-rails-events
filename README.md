@@ -9,7 +9,54 @@ A bit of a mix of stuff, and all work in progress. Here's a flavour:
 You need to `include` these yourself.
 
 ### Rooftop::Rails::Events::EventHandler
-A mixin for a controller which handles events. It has methods for show() and instances() which get the event from Rooftop for you.
+A mixin for a controller which handles events. It has methods for show(), instances() and book_instance() which get the event from Rooftop for you.
+
+In the simplest form, you can just include this in your controller
+
+```
+class EventsController < ApplicationController
+    include Rooftop::Rails::Events::EventHandler
+end
+````
+
+But each method yields to a block so you can do other stuff if you want. Here's a more representative EventsController from a real project:
+
+```
+class EventsController < ApplicationController
+  include Rooftop::Rails::Events::EventHandler
+  decorates_assigned :events, :event, with: EventDecorator
+  layout :determine_layout
+
+  def instances
+    # Pass a block into the EventHandler mixin's method, which is yielded to at the end of the method
+    super do
+      # If the event has an external ticketing url, redirect to it instead of rendering a list of instances
+      # n.b. pretty obviously you'll need to define has_external_ticketing_url?() and external_ticketing_url() on your model
+      if @event.has_external_ticketing_url?
+        redirect_to @event.external_ticketing_url and return
+      end
+
+      # If the event only has 1 instance, it seems a bit mean to list that instance and make the user click again; go straight to the book_instance method
+      if @event.instances.count == 1
+        redirect_to action: :book_instance, instance_id: @event.instances.first.meta_attributes[:spektrix_id] and return
+      end
+
+    end
+  end
+
+  private
+  def determine_layout
+    case action_name.to_sym
+      when :show
+        "templates/event_detail"
+      when :instances
+        "templates/instance_list"
+      when :book_instance
+        "templates/iframe_wide"
+    end
+  end
+end
+```
 
 ## Model Mixins
 These are `include`d automatically when you use this gem.
