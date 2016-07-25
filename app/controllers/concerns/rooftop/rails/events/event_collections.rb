@@ -6,12 +6,12 @@ module Rooftop
         extend ActiveSupport::Concern
 
         included do
-          before_action :get_index_events, only: :show, if: -> {:template_matches}
+          before_action :get_index_events, only: :show, if: :template_matches?
         end
 
         class_methods do
           attr_reader :event_index_template, :event_filters, :filter_keys
-          def event_index_template(template)
+          def event_index_template=(template)
             @event_index_template = template.to_s
           end
 
@@ -34,7 +34,7 @@ module Rooftop
         end
 
         private
-        def template_matches
+        def template_matches?
           self.class.event_index_template.present? && defined?(@page) && @page.template.present? && @page.template.underscore == self.class.event_index_template
         end
 
