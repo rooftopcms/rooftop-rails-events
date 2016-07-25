@@ -6,7 +6,6 @@ module Rooftop
           base.extend ClassMethods
           if ::Rails.configuration.action_controller.perform_caching
             base.send(:alias_method_chain, :related_events, :caching)
-            base.send(:after_find, :cache_instance_ids)
           end
 
           base.class_eval do
@@ -25,12 +24,6 @@ module Rooftop
         def related_events_with_caching(opts = {})
           Rails.cache.fetch(related_cache_key) do
             related_events_without_caching(opts)
-          end
-        end
-
-        def cache_instance_ids
-          if respond_to?(:embedded_instances)
-            embedded_instances.each {|i| i.cache_parent_id}
           end
         end
 
